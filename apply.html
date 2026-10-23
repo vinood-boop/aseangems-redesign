@@ -387,18 +387,15 @@
     }
 
     /* ----- Requirements in the sidebar, ticked off as the student answers ----- */
-    const awardLine = a => a.kind === 'full' ? 'Full scholarship' : `Partial scholarship · ${a.text || (a.kind === 'percent' ? `${a.value}% tuition fee waiver` : 'USD ' + a.value.toLocaleString('en-US'))}`;
     function requirementsBox() {
       if (!sd) return `<div class="reqs"><h4>Requirements</h4><p class="rq-none">The requirements for this ${WORD} haven't been added yet.</p></div>`;
       const ALL = 11;
       const nat = sd.nationalities.length === ALL ? 'All ASEAN countries' : sd.nationalities.length === ALL - 1 ? `All ASEAN except ${['Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Timor-Leste', 'Vietnam'].find(c => !sd.nationalities.includes(c))}` : sd.nationalities.join(', ');
-      const grade = sd.grade ? `${sd.grade.scale.replace(/\s*\(.*\)/, '')} ${sd.grade.min} and above ${(sd.grade.scale.match(/\(.*\)/) || [''])[0]}` : sd.tiers ? `From ${sd.tiers.rows[sd.tiers.rows.length - 1].min} (${sd.tiers.scale})` : 'No minimum grade';
+      const grade = sd.grade ? `${sd.grade.scale.replace(/\s*\(.*\)/, '')} ${sd.grade.min} and above ${(sd.grade.scale.match(/\(.*\)/) || [''])[0]}` : sd.tiers ? (([n, unit]) => `${n} ${(m => Number.isInteger(m) ? m : m.toFixed(2))(sd.tiers.rows[sd.tiers.rows.length - 1].min)} and above${unit}`)((sd.tiers.scale.match(/^(.*?)\s*(\(.*\))?$/) || []).slice(1).map((x, i) => i ? (x ? ' ' + x : '') : x)) : 'No minimum grade';
       const mark = ok => ok == null ? '' : `<span class="mk ${ok ? 'y' : 'n'}">${icon(ok ? 'check' : 'warn')}</span>`;
       const row = (k, v, ok) => `<div class="rq"><span class="k">${k}</span><span class="v">${v}</span>${mark(ok)}</div>`;
       return `<div class="reqs"><h4>Requirements</h4>
-          ${row('Scholarship', sd.tiers ? 'Depends on your results' : awardLine(sd.award))}
           ${row('Academic', `${grade}<small>Checked from your transcript</small>`)}
-          ${sd.tiers ? `<table class="mini"><tbody>${sd.tiers.rows.map((r, i, all) => `<tr><td>${i === 0 ? `${r.min}+` : `${r.min} – ${Number.isInteger(r.min) ? all[i - 1].min - 1 : (all[i - 1].min - .01).toFixed(2)}`}</td><td>${r.award.kind === 'full' ? 'Full' : r.award.kind === 'percent' ? r.award.value + '%' : 'USD ' + r.award.value.toLocaleString('en-US')}</td></tr>`).join('')}</tbody></table>` : ''}
           ${row('English', noEnglish ? 'Not required' : sd.english.map(([t, m]) => m ? `${t} ${m}` : t).join('<br>'), noEnglish ? null : check.eng())}
           ${row('Nationality', nat, check.nat())}
           ${row('Level of study', sd.levels.join(', '), check.level())}
