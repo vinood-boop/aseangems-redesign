@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AseanGems - Compare Scholarships</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500..900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ag-primary: #0D6EFD;
+      --ag-blue: #237CE5;
+      --ag-blue-bright: #1E75F2;
+      --ag-blue-soft: #E6EEFB;
+      --ag-navy: #1B4591;
+      --ag-heading: #202124;
+      --ag-text: #333438;
+      --ag-text-2: #5F6368;
+      --ag-muted: #8A8F99;
+      --ag-surface-2: #F6F7F8;
+      --ag-surface-3: #E7E9EB;
+      --ag-border: #E6E8EB;
+      --ag-divider: #D9DADC;
+      --ag-warm: #F8F8F4;
+      --ag-callout-bg: #FDF2C8;
+      --ag-callout-ink: #441904;
+      --ag-warning: #854F0B; --ag-warning-bg: #FAEEDA;
+      --shadow-float: 0 6px 15px -6px rgba(30,30,30,.4);
+      --shadow-lift: 0 18px 40px -22px rgba(21,42,86,.45);
+      --shadow-soft: 0 1px 3px rgba(30,30,30,.14);
+      --ease: cubic-bezier(.2,.7,.2,1);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Poppins, sans-serif; font-size: 14px; line-height: 1.5; color: var(--ag-text); background: #fff; -webkit-font-smoothing: antialiased; }
+    button { font-family: inherit; color: inherit; }
+    h1, h3, p { margin: 0; }
+    a { color: var(--ag-blue-bright); }
+    .container { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
+    .ico { width: 18px; height: 18px; flex: none; }
+
+    /* ---------- Hero + floating site header (same as opportunities.html / index.html) ---------- */
+    /* Hero height + card overlap are shared across pages so every page lines up */
+    .hero { position: relative; height: 340px; background: #2b3a55 url("https://aseangems.org/images/profile-bg.jpg") center 40% / cover no-repeat; }
+    .hero::before { content: ""; position: absolute; inset: 0; background: var(--ag-navy); opacity: .84; }
+    .hero-hdr { position: absolute; top: 16px; left: 0; right: 0; z-index: 10; }
+    .site-header { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      background: #fff; border-radius: 14px; padding: 10px 14px 10px 20px; box-shadow: var(--shadow-float); }
+    .site-header .logo img { height: 40px; display: block; }
+    .site-header nav { display: flex; align-items: center; gap: 6px; }
+    .site-header nav a { display: inline-flex; align-items: center; gap: 4px; padding: 9px 16px; border-radius: 10px; color: var(--ag-text-2); text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1; transition: color .2s, background .2s; }
+    .site-header nav a:hover { color: var(--ag-blue-bright); background: var(--ag-surface-2); }
+    .site-header nav a.on { color: var(--ag-blue-bright); }
+    .site-header .tools { display: flex; align-items: center; gap: 10px; padding-left: 14px; border-left: 1px solid var(--ag-border); }
+    .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 0; background: none; display: grid; place-items: center; cursor: pointer; color: var(--ag-text); transition: background .2s; }
+    .icon-btn:hover { background: var(--ag-surface-2); }
+    .icon-btn.menu { display: none; }
+    .me { width: 34px; height: 34px; border-radius: 50%; background: var(--ag-text); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 600; text-decoration: none; }
+
+    .hero-copy { position: relative; z-index: 2; text-align: center; color: #fff; padding-top: 108px; }
+    .hero-back { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,.8); text-decoration: none; padding: 2px 6px; border-radius: 6px; }
+    .hero-back:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .hero-back .ico { width: 15px; height: 15px; }
+    .hero-copy h1 { font-size: 40px; font-weight: 600; margin: 4px 0 6px; line-height: 1.2; }
+    .hero-copy p { font-size: 16px; opacity: .85; max-width: 580px; margin: 0 auto; }
+
+    /* ---------- Compare card overlapping the hero ---------- */
+    .panel { position: relative; z-index: 3; margin-top: -64px; background: #fff; border: 1px solid var(--ag-border); border-radius: 12px; box-shadow: var(--shadow-lift); padding: 20px; }
+    .tools-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tools-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+
+    .seg { display: inline-flex; gap: 4px; padding: 4px; background: var(--ag-surface-3); border-radius: 8px; }
+    .seg button { border: 0; background: none; padding: 8px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; color: var(--ag-muted); cursor: pointer; transition: background .2s, color .2s, box-shadow .2s; }
+    .seg button:hover { color: var(--ag-text); }
+    .seg button.on { background: #fff; color: var(--ag-heading); box-shadow: var(--shadow-soft); }
+
+    .switch { display: inline-flex; align-items: center; gap: 10px; border: 0; background: none; padding: 4px; font-size: 13px; font-weight: 500; color: var(--ag-text); cursor: pointer; }
+    .switch .track { width: 36px; height: 20px; border-radius: 999px; background: #C5CAD1; position: relative; transition: background .2s; }
+    .switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-soft); transition: transform .2s var(--ease); }
+    .switch.on .track { background: var(--ag-primary); }
+    .switch.on .track::after { transform: translateX(16px); }
+    .add-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ag-blue-bright); text-decoration: none; }
+    .add-link:hover { text-decoration: underline; }
+    .add-link .ico { width: 15px; height: 15px; }
+
+    .callout { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; background: var(--ag-callout-bg); color: var(--ag-callout-ink); font-size: 14px; }
+    .callout .ico { width: 18px; height: 18px; }
+    .callout a { margin-left: auto; color: var(--ag-callout-ink); font-weight: 600; white-space: nowrap; }
+
+    /* ---------- The comparison table ---------- */
+    .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--ag-border); border-radius: 12px; }
+    .tbl { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+    .tbl col.k { width: 200px; }
+    .tbl th, .tbl td { padding: 14px 18px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--ag-border); }
+    .tbl thead th { vertical-align: bottom; padding-top: 18px; background: #fff; }
+    .tbl tbody th { position: sticky; left: 0; z-index: 1; background: #fff; font-size: 13px; font-weight: 500; color: var(--ag-text-2); }
+    .tbl td { font-size: 14px; color: var(--ag-heading); overflow-wrap: anywhere; }
+    .tbl tr.group th { position: static; padding: 18px 18px 10px; background: var(--ag-surface-2); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ag-navy); }
+    .tbl tr.group th .ico { width: 15px; height: 15px; vertical-align: -3px; margin-right: 6px; }
+    .tbl tbody tr:last-child > * { border-bottom: 0; }
+    .tbl.diff tr.differs td, .tbl.diff tr.differs th { background: #FFFBEA; }
+    .tbl.diff tr.same { opacity: .45; }
+
+    .s-head { display: flex; flex-direction: column; gap: 8px; }
+    .s-head .top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .ilogo { position: relative; flex: none; display: grid; place-items: center; width: 52px; height: 52px; padding: 4px; background: #fff; border: 1px solid var(--ag-border); border-radius: 10px; overflow: hidden; }
+    .ilogo img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+    .ilogo.fb { background: var(--ag-blue-soft); border-color: transparent; }
+    .ilogo.fb::after { content: attr(data-i); font-size: 13px; font-weight: 700; color: var(--ag-navy); }
+    .s-title { font-size: 15px; font-weight: 600; color: var(--ag-heading); line-height: 1.4; overflow-wrap: anywhere; }
+    .s-title a { color: inherit; text-decoration: none; }
+    .s-title a:hover { color: var(--ag-blue-bright); }
+    .rm { flex: none; width: 28px; height: 28px; border: 0; padding: 0; border-radius: 50%; background: none; color: var(--ag-muted); display: grid; place-items: center; cursor: pointer; transition: background .15s, color .15s; }
+    .rm:hover { background: var(--ag-surface-3); color: var(--ag-heading); }
+    .rm .ico { width: 14px; height: 14px; }
+    .apply { display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; height: 36px; padding: 0 18px; border-radius: 30px; background: var(--ag-primary); color: #fff; font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: background .2s; }
+    .apply:hover { background: #0B5ED7; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; color: var(--ag-text); background: var(--ag-surface-2); border: 1px solid var(--ag-border); border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+    .chip.lv { color: var(--ag-blue); background: var(--ag-blue-soft); border-color: transparent; }
+    .chip .ico { width: 13px; height: 13px; }
+    .none { color: var(--ag-muted); font-weight: 400; }
+    .soon { display: inline-flex; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 1px 8px; background: var(--ag-warning-bg); color: var(--ag-warning); margin-left: 6px; vertical-align: 2px; }
+
+    .empty { text-align: center; padding: 56px 16px; border: 1px dashed var(--ag-divider); border-radius: 12px; background: var(--ag-warm); }
+    .empty b { display: block; font-size: 16px; font-weight: 600; color: var(--ag-heading); }
+    .empty span { display: block; font-size: 14px; color: var(--ag-muted); margin: 4px 0 16px; }
+    .btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 28px; border-radius: 30px; background: var(--ag-primary); color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; }
+    .btn-primary:hover { background: #0B5ED7; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1000px) {
+      .site-header nav { display: none; }
+      .icon-btn.menu { display: grid; }
+    }
+    @media (max-width: 700px) {
+      .container { padding: 0 16px; }
+      .site-header { padding: 8px 10px 8px 14px; }
+      .site-header .logo img { height: 32px; }
+      .hero { height: 300px; }
+      .hero-copy { padding-top: 92px; }
+      .hero-copy h1 { font-size: 28px; }
+      .hero-copy p { font-size: 14px; }
+      .panel { margin-top: -56px; padding: 14px; }
+      .tools-row .seg { display: flex; width: 100%; }
+      .tools-row .seg button { flex: 1; padding: 8px 4px; }
+      .tbl col.k { width: 130px; }
+      .tbl th, .tbl td { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-cap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5 12 5l10 4.5-10 4.5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5M22 9.5V15"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.5-.8-1.4-1.2-2.5-1.2-1.5 0-2.5.8-2.5 2s1 1.6 2.5 2 2.5.9 2.5 2.1-1.1 1.9-2.5 1.9c-1.2 0-2.2-.5-2.6-1.3M12 6.5v1.5M12 16v1.5"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- Full-width hero with floating site header -->
+  <div class="hero">
+    <div class="hero-hdr">
+      <div class="container">
+        <header class="site-header">
+          <a class="logo" href="index.html"><img src="https://aseangems.org/images/lg-logo.png" alt="ASEAN GEMS"></a>
+          <nav>
+            <a href="opportunities.html" class="on">Scholarships</a>
+            <a href="opportunities.html#mobility">Mobility</a>
+            <a href="#">News</a>
+            <a href="#">FAQS</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+          </nav>
+          <div class="tools">
+            <button class="icon-btn" type="button" aria-label="Search"><svg class="ico"><use href="#i-search"/></svg></button>
+            <button class="icon-btn menu" type="button" aria-label="Menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+            <a class="me" href="index.html" aria-label="My profile">AR</a>
+          </div>
+        </header>
+      </div>
+    </div>
+    <div class="container hero-copy">
+      <a class="hero-back" href="opportunities.html"><svg class="ico"><use href="#i-left"/></svg>Back to scholarships</a>
+      <h1>Scholarship comparison</h1>
+      <p data-sub>Overview, eligibility and fees side by side.</p>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="panel" data-panel></div>
+  </main>
+
+  <div style="height:64px"></div>
+
+  <script src="listings.js"></script>
+  <script>
+    const MAX = 4, MIN = 2;
+    const COUNTRY_COUNT = 11;
+    const byUrl = Object.fromEntries(DATA.sch.map(it => [it.url, it]));
+    const $ = s => document.querySelector(s);
+
+    let picks = readCompare().filter(u => byUrl[u]);
+    const view = { tab: 'all', diff: false };
+
+    /* ----- Formatting: the source data uses 0 / "0 - 0" / N/A, so say what those mean ----- */
+    const NL = '<span class="none">Not listed yet</span>';
+    const fCgpa = v => v > 0 ? v.toFixed(2) : '<span class="none">No minimum</span>';
+    const fIncome = ([a, b]) => !a && !b ? '<span class="none">No limit</span>' : `Up to USD ${b.toLocaleString()} / month`;
+    const fNA = v => !v || v === 'N/A' ? '<span class="none">Not required</span>' : v;
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const parse = s => { const [d, m, y] = s.split(' '); return new Date(+y, MONTHS.indexOf(m), +d); };
+    const daysLeft = s => Math.round((parse(s) - new Date().setHours(0, 0, 0, 0)) / 864e5);
+
+    const icon = id => `<svg class="ico"><use href="#i-${id}"/></svg>`;
+    const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    const initials = s => s.replace(/\(.*?\)/g, '').split(/\s+/).filter(w => /^[A-Z]/.test(w)).slice(0, 3).map(w => w[0]).join('');
+    const logo = it => `<span class="ilogo${it.logo ? '' : ' fb'}" data-i="${esc(initials(it.inst))}">${it.logo ? `<img src="${esc(it.logo)}" alt="" onerror="this.parentNode.classList.add('fb');this.remove()">` : ''}</span>`;
+    const det = it => COMPARE_DETAILS[it.url]; // undefined until the details are supplied
+
+    // [section, label, how to show it, raw value used to spot differences]
+    const ROWS = [
+      ['ov', 'Institution', it => esc(it.inst), it => it.inst],
+      ['ov', 'Location', it => it.loc ? esc(it.loc) : '<span class="none">Not listed</span>', it => it.loc],
+      ['ov', 'Apply before', it => { if (!it.date) return NL; const d = daysLeft(it.date); return `${it.date}${d >= 0 && d <= 14 ? '<span class="soon">Closing soon</span>' : ''}`; }, it => it.date],
+      ['ov', 'Course level', it => det(it) ? `<div class="chips">${det(it).levels.map(l => `<span class="chip lv">${icon('cap')}${esc(l)}</span>`).join('')}</div>` : NL, it => det(it)?.levels.join()],
+      ['el', 'Eligible countries', it => det(it) ? `<div class="chips">${det(it).countries.map(c => `<span class="chip">${c}</span>`).join('')}</div><p class="none" style="font-size:12px;margin-top:6px">${det(it).countries.length} of ${COUNTRY_COUNT} ASEAN countries</p>` : NL, it => det(it)?.countries.join()],
+      ['el', 'Minimum CGPA', it => det(it) ? fCgpa(det(it).cgpa) : NL, it => det(it)?.cgpa],
+      ['el', 'Household income', it => det(it) ? fIncome(det(it).income) : NL, it => det(it)?.income.join()],
+      ['el', 'Leadership', it => det(it) ? fNA(det(it).leadership) : NL, it => det(it)?.leadership],
+      ['el', 'Sports', it => det(it) ? fNA(det(it).sports) : NL, it => det(it)?.sports],
+      ['fe', 'Fees / value', it => det(it)?.fees ? esc(det(it).fees) : NL, it => det(it)?.fees],
+    ];
+    const SECTIONS = { ov: ['Overview', 'info'], el: ['Eligibility', 'shield'], fe: ['Fees', 'coin'] };
+
+    function render() {
+      const items = picks.map(u => byUrl[u]), n = items.length;
+      $('[data-sub]').textContent = n ? `Comparing ${n} of ${MAX} scholarships side by side` :'Overview, eligibility and fees side by side.';
+
+      if (!n) {
+        $('[data-panel]').innerHTML = `<div class="empty"><b>Nothing to compare yet</b><span>Tick "Compare" on at least ${MIN} scholarships to see them side by side.</span><a class="btn-primary" href="opportunities.html">Browse scholarships</a></div>`;
+        return;
+      }
+
+      const tabs = [['all', 'All'], ...Object.entries(SECTIONS).map(([k, [l]]) => [k, l])];
+      const groups = Object.keys(SECTIONS).filter(g => view.tab === 'all' || view.tab === g);
+      const body = groups.map(g => `<tr class="group"><th colspan="${n + 1}">${icon(SECTIONS[g][1])}${SECTIONS[g][0]}</th></tr>` +
+        ROWS.filter(r => r[0] === g).map(([, k, show, raw]) => {
+          const differs = n > 1 && new Set(items.map(it => JSON.stringify(raw(it) ?? null))).size > 1;
+          return `<tr class="${differs ? 'differs' : 'same'}"><th scope="row">${k}</th>${items.map(it => `<td>${show(it)}</td>`).join('')}</tr>`;
+        }).join('')).join('');
+
+      $('[data-panel]').innerHTML = `
+        <div class="tools-row">
+          <div class="seg" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" class="${view.tab === k ? 'on' : ''}" aria-selected="${view.tab === k}">${l}</button>`).join('')}</div>
+          <div class="tools-right">
+            ${n > 1 ? `<button class="switch${view.diff ? ' on' : ''}" type="button" data-diff aria-pressed="${view.diff}"><span class="track"></span>Highlight differences</button>` : ''}
+            ${n < MAX ? `<a class="add-link" href="opportunities.html">${icon('plus')}Add a scholarship</a>` : ''}
+          </div>
+        </div>
+        ${n < MIN ? `<div class="callout">${icon('info')}Add at least one more scholarship to compare.<a href="opportunities.html">Pick another</a></div>` : ''}
+        <div class="tbl-wrap"><table class="tbl${view.diff ? ' diff' : ''}" style="min-width:${200 + n * 230}px">
+          <colgroup><col class="k">${items.map(() => '<col>').join('')}</colgroup>
+          <thead><tr><th></th>${items.map(it => `<th><div class="s-head">
+              <div class="top">${logo(it)}<button class="rm" type="button" data-rm="${esc(it.url)}" aria-label="Remove ${esc(it.t)}">${icon('x')}</button></div>
+              <h3 class="s-title"><a href="${esc(pageUrl(it.url))}">${esc(it.t)}</a></h3>
+              <a class="apply" href="${esc(pageUrl(it.url))}">Apply Now</a>
+            </div></th>`).join('')}</tr></thead>
+          <tbody>${body}</tbody>
+        </table></div>`;
+    }
+
+    document.addEventListener('click', e => {
+      const t = e.target;
+      const tab = t.closest('[data-tab]');
+      if (tab) { view.tab = tab.dataset.tab; return render(); }
+      if (t.closest('[data-diff]')) { view.diff = !view.diff; return render(); }
+      const r = t.closest('[data-rm]');
+      if (r) { picks = picks.filter(u => u !== r.dataset.rm); writeCompare(picks); return render(); }
+      if (t.closest('a[href="#"]')) e.preventDefault();
+    });
+
+    // Stay in step if picks change in another tab
+    window.addEventListener('storage', e => { if (e.key === CMP_KEY) { picks = readCompare().filter(u => byUrl[u]); render(); } });
+
+    render();
+  </script>
+</body>
+</html>
