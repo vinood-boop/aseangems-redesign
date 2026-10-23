@@ -120,6 +120,27 @@
     .err { display: block; margin-top: 6px; font-size: 14px; color: var(--ag-error); }
     .hint { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; background: var(--ag-warning-bg); color: var(--ag-warning); font-size: 13px; line-height: 1.5; }
     .hint .ico { width: 16px; height: 16px; margin-top: 2px; }
+    .hint.ok { background: var(--ag-success-bg); color: var(--ag-success); }
+    .grid2 > div > [data-hint] .hint { margin-top: 8px; }
+    .eng-box { border: 1px solid var(--ag-border); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .eng-box h3 { font-size: 16px; font-weight: 600; color: var(--ag-heading); margin: 0; }
+    .eng-box p { margin: -6px 0 0; font-size: 13px; color: var(--ag-text-2); }
+    .eng-box b { color: var(--ag-heading); font-weight: 600; }
+    .fx select optgroup { font-weight: 600; }
+    .reqs { padding: 16px 20px 20px; border-top: 1px solid var(--ag-border); }
+    .reqs h4 { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--ag-heading); }
+    .rq { display: grid; grid-template-columns: 92px 1fr 20px; gap: 8px; align-items: start; padding: 9px 0; border-bottom: 1px solid var(--ag-border); font-size: 12px; }
+    .rq:last-child { border-bottom: 0; padding-bottom: 0; }
+    .rq .k { color: var(--ag-muted); }
+    .rq .v { color: var(--ag-heading); font-weight: 500; line-height: 1.45; }
+    .rq .v small { display: block; font-size: 11px; font-weight: 400; color: var(--ag-muted); }
+    .rq .mk { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; }
+    .rq .mk .ico { width: 11px; height: 11px; }
+    .rq .mk.y { background: var(--ag-success-bg); color: var(--ag-success); }
+    .rq .mk.n { background: var(--ag-warning-bg); color: var(--ag-warning); }
+    .mini { width: 100%; border-collapse: collapse; font-size: 12px; margin: 2px 0 6px; }
+    .mini td { padding: 5px 8px; border: 1px solid var(--ag-border); }
+    .rq-none { margin: 0; font-size: 12px; color: var(--ag-muted); }
 
     /* Upload */
     .drop { display: flex; align-items: center; gap: 16px; padding: 22px; border: 1.5px dashed #C5CAD1; border-radius: 12px; background: var(--ag-surface-2); cursor: pointer; transition: border-color .2s, background .2s; }
@@ -274,12 +295,29 @@
     const PROFILE = { email: 'aisha.rahman@example.com', dial: '+60', phone: '12-345 6789', residence: 'Malaysia', nationality: 'Malaysia' };
     const COUNTRIES = ['Brunei Darussalam', 'Cambodia', 'East Timor', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Vietnam', 'Other'];
     const DIALS = ['+673', '+855', '+670', '+62', '+856', '+60', '+95', '+63', '+65', '+66', '+84'];
-    const LEVELS = ['Pre-University', 'Foundation', 'Diploma', 'Undergraduate', 'Masters', 'Postgraduate (PhD)'];
-    const FIELDS = ['Applied Science', 'Arts & Humanities', 'Business & Management', 'Computing & IT', 'Education', 'Engineering', 'Health Sciences', 'Hospitality & Tourism', 'Law', 'Social Sciences'];
+    const LEVELS = ['Foundation', 'Diploma', 'Pre-University', 'Undergraduate', 'Master', 'PhD'];
+    const FIELDS = ['Business', 'Engineering', 'IT / Computer Science', 'Health Sciences', 'Education', 'Arts & Humanities', 'Law', 'Science', 'Social Sciences', 'Agriculture & Natural Resources', 'Hospitality, Tourism & Culinary', 'Real Estate / Built Environment', 'Islamic Studies / Religious Studies'];
+    // English tests and how each one is scored
+    const ENG = {
+      'IELTS': { scale: 'Band 0 – 9', min: 0, max: 9 },
+      'TOEFL': { scale: 'iBT 0 – 120', min: 0, max: 120 },
+      'TOEFL (iBT)': { scale: '0 – 120', min: 0, max: 120 },
+      'TOEFL Essentials': { scale: '1 – 12', min: 1, max: 12 },
+      'MUET': { scale: 'Band 1 – 5+', bands: ['Band 1', 'Band 2', 'Band 3', 'Band 3.5', 'Band 4', 'Band 4.5', 'Band 5', 'Band 5+'] },
+      'PTE': { scale: '10 – 90', min: 10, max: 90 },
+      'CEFR': { scale: 'A1 – C2', bands: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] },
+      'Linguaskill': { scale: '82 – 180', min: 82, max: 180 },
+      'TOEIC': { scale: '10 – 990', min: 10, max: 990 },
+      'Other / equivalent': { free: true },
+    };
+    const sd = isSch ? SCHOLARSHIP_DETAILS[url] || null : null;   // the requirements the university keyed in
+    const BACKEND_TESTS = ['IELTS', 'TOEFL', 'MUET', 'PTE', 'CEFR', 'Linguaskill', 'TOEIC', 'Other / equivalent']; // same list universities pick from
+    const noEnglish = !!sd && sd.english.every(e => e[0] === 'Not required');
+    const accepted = sd ? sd.english.map(e => e[0]).filter(t => ENG[t]) : [];
     const MAX_FILES = 25;
     const STEPS = [
       { k: 'basic', l: 'Basic info', sub: 'Contact and country', h: 'Your basic info', lead: "We've filled these in from your profile. Change anything that's out of date." },
-      { k: 'qs', l: 'Questions', sub: 'Studies and results', h: 'A few questions', lead: 'This helps the university check you meet the requirements.' },
+      { k: 'qs', l: 'Questions', sub: 'Studies and English', h: 'A few questions', lead: 'Your level, field and English test. Your grades are checked from your transcript, so there is nothing to convert.' },
       { k: 'docs', l: 'Documents', sub: 'Supporting files', h: 'Supporting documents', lead: `Add up to ${MAX_FILES} files. PDF, JPG or PNG.` },
       { k: 'review', l: 'Review', sub: 'Check and submit', h: 'Review your application', lead: 'You can still change anything before you submit.' },
     ];
@@ -294,7 +332,7 @@
     const st = {
       step: draft?.step || 0, agree: false, err: {}, saving: false, done: false, resumed: !!draft,
       files: draft?.files || [],   // name + size only; the files themselves aren't kept in this prototype
-      d: { ...PROFILE, level: '', cgpa: '', field: '', ...(draft?.d || {}) },
+      d: { ...PROFILE, level: '', field: '', etest: '', escore: '', ...(draft?.d || {}) },
     };
     const saveDraft = () => keep(DRAFT_KEY, { step: st.step, d: st.d, files: st.files });
 
@@ -310,7 +348,64 @@
     // Soft checks against this listing's own rules, when we know them (never block submitting)
     const nationalityHint = () => det && st.d.nationality && st.d.nationality !== 'Other' && !det.countries.includes(st.d.nationality)
       ? `<div class="hint">${icon('warn')}<span>This ${WORD} lists ${det.countries.length} eligible countries and ${st.d.nationality} isn't one of them. You can still apply, but the university may not accept it.</span></div>` : '';
-    const cgpaHint = () => { const v = parseFloat(st.d.cgpa); return det?.cgpa && st.d.cgpa !== '' && !isNaN(v) && v <= 4 && v < det.cgpa ? `<div class="hint">${icon('warn')}<span>This ${WORD} asks for a CGPA of at least ${det.cgpa.toFixed(2)}.</span></div>` : ''; };
+    /* ----- Checking answers against the requirements (soft: they never block submitting) ----- */
+    const NAT_ALIAS = { 'Brunei Darussalam': 'Brunei', 'East Timor': 'Timor-Leste' };
+    const engValue = (test, v) => ENG[test]?.bands ? ENG[test].bands.indexOf(v) : parseFloat(String(v).replace(/[^\d.]/g, ''));
+    const check = {
+      nat: () => !sd || !st.d.nationality ? null : sd.nationalities.includes(NAT_ALIAS[st.d.nationality] || st.d.nationality),
+      level: () => !sd || !st.d.level ? null : sd.levels.includes(st.d.level),
+      field: () => !sd || !st.d.field ? null : sd.fields === 'all' || sd.fields.some(f => f[0] === st.d.field),
+      eng: () => {
+        if (!sd || !st.d.etest || st.d.escore === '') return null;
+        const req = sd.english.find(e => e[0] === st.d.etest);
+        if (!req) return accepted.length ? false : null;
+        return !req[1] || engValue(st.d.etest, st.d.escore) >= engValue(st.d.etest, req[1]);
+      },
+    };
+    const hint = (ok, good, bad) => ok == null ? '' : ok ? `<div class="hint ok">${icon('check')}<span>${good}</span></div>` : `<div class="hint">${icon('warn')}<span>${bad} You can still apply. The university decides.</span></div>`;
+    const levelHint = () => hint(check.level(), `${st.d.level} is eligible for this ${WORD}.`, `This ${WORD} is for ${sd?.levels.join(', ')}.`);
+    const fieldHint = () => hint(check.field(), `${st.d.field} is eligible.`, `This ${WORD} is for ${sd && sd.fields !== 'all' ? sd.fields.map(f => f[0]).join(', ') : ''}.`);
+    const engHint = () => {
+      const ok = check.eng(), req = sd?.english.find(e => e[0] === st.d.etest);
+      return hint(ok, `That meets the ${st.d.etest} requirement${req?.[1] ? ` (${req[1]})` : ''}.`,
+        req ? `This ${WORD} asks for ${st.d.etest} ${req[1]}.` : `This ${WORD} accepts ${accepted.join(', ')}.`);
+    };
+    // Score box follows the test's own scoring system
+    function scoreField() {
+      const t = ENG[st.d.etest];
+      if (!t) return fx('escore', 'Your score', `<input id="f-escore" data-k="escore" disabled placeholder="Choose a test first">`);
+      if (t.free) return fx('escore', 'Test name and score', `<input id="f-escore" data-k="escore" value="${esc(st.d.escore)}" placeholder="e.g. Cambridge C1 Advanced, 180">`);
+      if (t.bands) return fx('escore', `Your result (${t.scale})`, `<select id="f-escore" data-k="escore">${opts(t.bands, st.d.escore, 'Select')}</select><svg class="ico chev"><use href="#i-down"/></svg>`);
+      return fx('escore', `Your score (${t.scale})`, `<input id="f-escore" data-k="escore" inputmode="decimal" value="${esc(st.d.escore)}" placeholder="${t.min} – ${t.max}">`);
+    }
+    function testSelect() {
+      const others = BACKEND_TESTS.filter(t => !accepted.includes(t) && !(t === 'TOEFL' && accepted.includes('TOEFL (iBT)')));
+      const o = t => `<option ${t === st.d.etest ? 'selected' : ''}>${esc(t)}</option>`;
+      const inner = `<option value="" disabled ${st.d.etest ? '' : 'selected'}>Select your test</option>`
+        + (accepted.length ? `<optgroup label="Accepted by this ${WORD}">${accepted.map(o).join('')}</optgroup><optgroup label="Other tests">${others.map(o).join('')}</optgroup>` : BACKEND_TESTS.map(o).join(''));
+      return fx('etest', 'English test', `<select id="f-etest" data-k="etest">${inner}</select><svg class="ico chev"><use href="#i-down"/></svg>`);
+    }
+
+    /* ----- Requirements in the sidebar, ticked off as the student answers ----- */
+    const awardLine = a => a.kind === 'full' ? 'Full scholarship' : `Partial scholarship · ${a.text || (a.kind === 'percent' ? `${a.value}% tuition fee waiver` : 'USD ' + a.value.toLocaleString('en-US'))}`;
+    function requirementsBox() {
+      if (!sd) return `<div class="reqs"><h4>Requirements</h4><p class="rq-none">The requirements for this ${WORD} haven't been added yet.</p></div>`;
+      const ALL = 11;
+      const nat = sd.nationalities.length === ALL ? 'All ASEAN countries' : sd.nationalities.length === ALL - 1 ? `All ASEAN except ${['Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Timor-Leste', 'Vietnam'].find(c => !sd.nationalities.includes(c))}` : sd.nationalities.join(', ');
+      const grade = sd.grade ? `${sd.grade.scale.replace(/\s*\(.*\)/, '')} ${sd.grade.min} and above ${(sd.grade.scale.match(/\(.*\)/) || [''])[0]}` : sd.tiers ? `From ${sd.tiers.rows[sd.tiers.rows.length - 1].min} (${sd.tiers.scale})` : 'No minimum grade';
+      const mark = ok => ok == null ? '' : `<span class="mk ${ok ? 'y' : 'n'}">${icon(ok ? 'check' : 'warn')}</span>`;
+      const row = (k, v, ok) => `<div class="rq"><span class="k">${k}</span><span class="v">${v}</span>${mark(ok)}</div>`;
+      return `<div class="reqs"><h4>Requirements</h4>
+          ${row('Scholarship', sd.tiers ? 'Depends on your results' : awardLine(sd.award))}
+          ${row('Academic', `${grade}<small>Checked from your transcript</small>`)}
+          ${sd.tiers ? `<table class="mini"><tbody>${sd.tiers.rows.map((r, i, all) => `<tr><td>${i === 0 ? `${r.min}+` : `${r.min} – ${Number.isInteger(r.min) ? all[i - 1].min - 1 : (all[i - 1].min - .01).toFixed(2)}`}</td><td>${r.award.kind === 'full' ? 'Full' : r.award.kind === 'percent' ? r.award.value + '%' : 'USD ' + r.award.value.toLocaleString('en-US')}</td></tr>`).join('')}</tbody></table>` : ''}
+          ${row('English', noEnglish ? 'Not required' : sd.english.map(([t, m]) => m ? `${t} ${m}` : t).join('<br>'), noEnglish ? null : check.eng())}
+          ${row('Nationality', nat, check.nat())}
+          ${row('Level of study', sd.levels.join(', '), check.level())}
+          ${row('Field of study', sd.fields === 'all' ? 'All fields' : sd.fields.map(f => f[0]).join(', '), check.field())}
+          ${sd.age ? row('Age', `${sd.age[0]} to ${sd.age[1]}`) : ''}
+        </div>`;
+    }
 
     function stepBody() {
       const s = STEPS[st.step].k;
@@ -319,9 +414,11 @@
           <div class="grid2">${sel('residence', 'Country of residence', COUNTRIES, 'Select a country')}${sel('nationality', 'Nationality', COUNTRIES, 'Select your nationality')}</div>
           <div data-hint="nat">${nationalityHint()}</div></div>`;
       if (s === 'qs') return `<div class="fields">
-          <div class="grid2">${sel('level', 'Level of study', LEVELS, 'Select your level')}${txt('cgpa', 'CGPA (0.00 – 4.00)', 'text', 'inputmode="decimal"')}</div>
-          ${sel('field', 'Field of study', FIELDS, 'Select a field')}
-          <div data-hint="cgpa">${cgpaHint()}</div></div>`;
+          <div class="grid2"><div>${sel('level', 'Level of study', LEVELS, 'Select your level')}<div data-hint="level">${levelHint()}</div></div><div>${sel('field', 'Field of study', FIELDS, 'Select a field')}<div data-hint="field">${fieldHint()}</div></div></div>
+          ${noEnglish ? `<div class="eng-box"><h3>English test</h3><p>This ${WORD} doesn't need an English test.</p></div>` : `<div class="eng-box"><h3>English test</h3><p>${accepted.length ? `This ${WORD} accepts <b>${sd.english.map(([t, m]) => m ? `${t} ${m}` : t).join('</b>, <b>')}</b>. You only need one.` : 'Choose the test you took and enter your result.'}</p>
+            <div class="grid2">${testSelect()}<div data-score>${scoreField()}</div></div>
+            <div data-hint="eng">${engHint()}</div></div>`}
+        </div>`;
       if (s === 'docs') return `<label class="drop" data-drop><input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" data-file hidden>
             <span class="badge">${icon('upload')}</span><div><b>Drop files here or <u>browse</u></b><span>${st.files.length} of ${MAX_FILES} uploaded · PDF, JPG or PNG</span></div></label>
           ${st.files.length ? `<ul class="files">${st.files.map((f, i) => `<li><span class="ft">${ext(f.name)}</span><div class="nm"><b>${esc(f.name)}</b><small>${size(f.size)}</small></div><button class="rm" type="button" data-unfile="${i}" aria-label="Remove ${esc(f.name)}">${icon('x')}</button></li>`).join('')}</ul>` : ''}
@@ -330,7 +427,7 @@
       const sec = (i, title, inner) => `<section class="rv-sec"><div class="rv-head"><h3>${title}</h3><button class="rv-edit" type="button" data-go="${i}">${icon('pen')}Edit</button></div>${inner}</section>`;
       return `<div class="rv">
           ${sec(0, 'Basic info', `<div class="rv-grid">${row('Email address', d.email)}${row('Phone number', d.phone && `${d.dial} ${d.phone}`)}${row('Country of residence', d.residence)}${row('Nationality', d.nationality)}</div>`)}
-          ${sec(1, 'Questions', `<div class="rv-grid">${row('Level of study', d.level)}${row('CGPA', d.cgpa && parseFloat(d.cgpa).toFixed(2))}${row('Field of study', d.field)}</div>`)}
+          ${sec(1, 'Questions', `<div class="rv-grid">${row('Level of study', d.level)}${row('Field of study', d.field)}${row('English test', d.etest)}${row('English score', d.escore)}</div>`)}
           ${sec(2, 'Documents', st.files.length ? `<ul class="files" style="margin:0">${st.files.map(f => `<li><span class="ft">${ext(f.name)}</span><div class="nm"><b>${esc(f.name)}</b><small>${size(f.size)}</small></div></li>`).join('')}</ul>`
             : `<div class="hint">${icon('warn')}<span>No documents uploaded.${docsAsked.length ? ` This ${WORD} asks for ${docsAsked.length}, so it's worth adding them first.` : ''}</span></div>`)}
           <label class="agree"><input type="checkbox" data-agree ${st.agree ? 'checked' : ''}><span>I confirm these details are correct and agree to share them with ${esc(it.inst)} for this application.</span></label>
@@ -383,6 +480,7 @@
             <a class="for" href="${esc(pageUrl(url))}">${logo}<div><small>Applying for</small><b>${esc(it.t)}</b><span>${it.date ? (isSch ? `Closes ${it.date}` : it.date) : esc(it.inst)}</span></div></a>
             <ol class="sv">${STEPS.map((s, i) => { const c = cls(i); return `<li class="${c}"><button type="button" ${!st.done && !prev && i < st.step ? `data-go="${i}"` : 'tabindex="-1"'}><span class="dot">${c === 'done' ? icon('check') : i + 1}</span><span><b>${s.l}</b><small>${c === 'done' ? 'Done' : c === 'cur' ? 'In progress' : s.sub}</small></span></button></li>`; }).join('')}</ol>
             <div class="progress"><div class="bar"><i style="width:${pct}%"></i></div><small>${pct}% complete</small></div>
+            <div data-reqs>${requirementsBox()}</div>
           </aside>
           <div class="main">${main}</div>
         </div>`;
@@ -400,8 +498,10 @@
       }
       if (s === 'qs') {
         if (!d.level) e.level = 'Please select your level of study.';
-        if (!/^\d(\.\d{1,2})?$/.test(d.cgpa.trim()) || parseFloat(d.cgpa) > 4) e.cgpa = 'Enter a CGPA between 0.00 and 4.00.';
         if (!d.field) e.field = 'Please select your field of study.';
+        if (!noEnglish && !d.etest) e.etest = 'Please choose your English test.';
+        const t = ENG[d.etest], v = parseFloat(d.escore);
+        if (!noEnglish && d.etest && (t.free ? !d.escore.trim() : t.bands ? !d.escore : isNaN(v) || v < t.min || v > t.max)) e.escore = t.free ? 'Please enter the test name and score.' : t.bands ? 'Please choose your result.' : `Enter a score between ${t.min} and ${t.max}.`;
       }
       st.err = e;
       return !Object.keys(e).length;
@@ -412,7 +512,7 @@
       const date = `${now.getDate()} ${now.toLocaleString('en-GB', { month: 'short' })} ${now.getFullYear()}`;
       const ref = `AG-${now.getFullYear()}-${String(Date.now()).slice(-5)}`;
       // Same shape as the rows on the dashboard's Applications tab
-      const app = { url, ref, status: 'Submitted', type, country: it.c, date, title: it.t, campus: it.loc || it.inst, cgpa: parseFloat(st.d.cgpa).toFixed(2), level: st.d.level, field: st.d.field,
+      const app = { url, ref, status: 'Submitted', type, country: it.c, date, title: it.t, campus: it.loc || it.inst, cgpa: '—', english: `${st.d.etest} ${st.d.escore}`, level: st.d.level, field: st.d.field,
         ini: initials(it.inst) || it.inst.slice(0, 4), logo: it.logo || null, files: st.files.map(f => f.name) };
       keep(APPS_KEY, [app, ...(load(APPS_KEY) || []).filter(a => a.url !== url)]);
       keep(DRAFT_KEY, null);
@@ -450,7 +550,7 @@
       if (un) { st.files.splice(+un.dataset.unfile, 1); render(true); return autosave(); }
       if (t.closest('[data-fresh]')) {
         keep(DRAFT_KEY, null);
-        Object.assign(st, { step: 0, files: [], err: {}, resumed: false, d: { ...PROFILE, level: '', cgpa: '', field: '' } });
+        Object.assign(st, { step: 0, files: [], err: {}, resumed: false, d: { ...PROFILE, level: '', field: '', etest: '', escore: '' } });
         return render();
       }
       if (t.closest('a[href="#"]')) e.preventDefault();
@@ -463,7 +563,11 @@
       st.d[k] = e.target.value;
       if (st.err[k]) { delete st.err[k]; const box = e.target.closest('.fx'); box.classList.remove('bad'); box.parentElement.querySelector('.err')?.remove(); }
       if (k === 'nationality') $('[data-hint="nat"]').innerHTML = nationalityHint();
-      if (k === 'cgpa') $('[data-hint="cgpa"]').innerHTML = cgpaHint();
+      if (k === 'etest') { st.d.escore = ''; $('[data-score]').innerHTML = scoreField(); }
+      if (k === 'level') $('[data-hint="level"]').innerHTML = levelHint();
+      if (k === 'field') $('[data-hint="field"]').innerHTML = fieldHint();
+      if (k === 'etest' || k === 'escore') $('[data-hint="eng"]').innerHTML = engHint();
+      const box = $('[data-reqs]'); if (box) box.innerHTML = requirementsBox();
       autosave();
     });
     document.addEventListener('change', e => {

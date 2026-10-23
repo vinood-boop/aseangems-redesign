@@ -643,7 +643,7 @@
           <h5>Academic</h5>
           <div class="sub-grid">
             ${field('Level of study', a.level)}
-            ${field('CGPA', a.cgpa)}
+            ${a.english ? field('English test', a.english) : field('CGPA', a.cgpa)}${a.field ? field('Field of study', a.field) : ''}
             ${field('Submitted on', a.date)}
           </div>
         </div>
