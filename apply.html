@@ -121,6 +121,7 @@
     .hint { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; background: var(--ag-warning-bg); color: var(--ag-warning); font-size: 13px; line-height: 1.5; }
     .hint .ico { width: 16px; height: 16px; margin-top: 2px; }
     .hint.ok { background: var(--ag-success-bg); color: var(--ag-success); }
+    .hint.stop { background: #FCEBEB; color: #A32D2D; }
     .grid2 > div > [data-hint] .hint { margin-top: 8px; }
     .eng-box { border: 1px solid var(--ag-border); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
     .eng-box h3 { font-size: 16px; font-weight: 600; color: var(--ag-heading); margin: 0; }
@@ -363,8 +364,12 @@
       },
     };
     const hint = (ok, good, bad) => ok == null ? '' : ok ? `<div class="hint ok">${icon('check')}<span>${good}</span></div>` : `<div class="hint">${icon('warn')}<span>${bad} You can still apply. The university decides.</span></div>`;
-    const levelHint = () => hint(check.level(), `${st.d.level} is eligible for this ${WORD}.`, `This ${WORD} is for ${sd?.levels.join(', ')}.`);
-    const fieldHint = () => hint(check.field(), `${st.d.field} is eligible.`, `This ${WORD} is for ${sd && sd.fields !== 'all' ? sd.fields.map(f => f[0]).join(', ') : ''}.`);
+    // Level and field are hard rules set by the university: a wrong answer stops the application here
+    const stopHint = (ok, good, bad) => ok == null ? '' : ok ? `<div class="hint ok">${icon('check')}<span>${good}</span></div>` : `<div class="hint stop">${icon('warn')}<span>${bad}</span></div>`;
+    const levelHint = () => stopHint(check.level(), `${st.d.level} is eligible for this ${WORD}.`, `This ${WORD} is only for ${sd?.levels.join(', ')}. You can't apply with ${st.d.level}.`);
+    const fieldHint = () => stopHint(check.field(), `${st.d.field} is eligible.`, `This ${WORD} is only for ${sd && sd.fields !== 'all' ? sd.fields.map(f => f[0]).join(', ') : ''}. You can't apply with ${st.d.field}.`);
+    const notEligible = () => check.level() === false || check.field() === false;
+    const nextOff = () => (st.step === 1 && notEligible()) || (st.step === 3 && (!st.agree || notEligible()));
     const engHint = () => {
       const ok = check.eng(), req = sd?.english.find(e => e[0] === st.d.etest);
       return hint(ok, `That meets the ${st.d.etest} requirement${req?.[1] ? ` (${req[1]})` : ''}.`,
@@ -467,7 +472,7 @@
           <div class="body">${stepBody()}</div>
           <div class="foot">${saveNote()}<div class="right">
             ${st.step === 0 ? `<a class="btn-text" href="${esc(pageUrl(url))}">Cancel</a>` : '<button class="btn-text" type="button" data-back>Back</button>'}
-            <button class="btn btn-primary" type="button" data-next ${st.step === 3 && !st.agree ? 'disabled' : ''}>${st.step === 3 ? 'Submit application' : `Continue${icon('arrow')}`}</button>
+            <button class="btn btn-primary" type="button" data-next ${nextOff() ? 'disabled' : ''}>${st.step === 3 ? 'Submit application' : `Continue${icon('arrow')}`}</button>
           </div></div>`;
       }
 
@@ -536,6 +541,7 @@
     document.addEventListener('click', e => {
       const t = e.target;
       if (t.closest('[data-next]')) {
+        if (nextOff()) return;
         if (st.step === 3) return submit();
         if (!validate()) { render(true); $('.fx.bad input, .fx.bad select')?.focus(); return; }
         st.step++; st.resumed = false; saveDraft(); return render();
@@ -565,11 +571,12 @@
       if (k === 'field') $('[data-hint="field"]').innerHTML = fieldHint();
       if (k === 'etest' || k === 'escore') $('[data-hint="eng"]').innerHTML = engHint();
       const box = $('[data-reqs]'); if (box) box.innerHTML = requirementsBox();
+      const nx = $('[data-next]'); if (nx) nx.disabled = nextOff();
       autosave();
     });
     document.addEventListener('change', e => {
       if (e.target.matches('[data-file]')) return addFiles(e.target.files);
-      if (e.target.matches('[data-agree]')) { st.agree = e.target.checked; $('[data-next]').disabled = !st.agree; }
+      if (e.target.matches('[data-agree]')) { st.agree = e.target.checked; $('[data-next]').disabled = nextOff(); }
     });
     ['dragover', 'dragleave', 'drop'].forEach(type => document.addEventListener(type, e => {
       const drop = e.target.closest?.('[data-drop]');
