@@ -4,3 +4,6 @@ page.html
 scripts.js
 styles.css
 New folder/
+
+# Design test pages (local only; push them on request)
+test*.html

@@ -144,6 +144,21 @@
     .fact .chips { justify-content: flex-end; }
     .none { color: var(--ag-muted) !important; font-weight: 400 !important; }
 
+    /* "Scholarship details" block (key/value table, plus a results table when the award depends on the grade) */
+    .kv { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .kv th, .kv td { padding: 13px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--ag-border); }
+    .kv th { width: 210px; padding-right: 20px; font-weight: 500; color: var(--ag-text-2); }
+    .kv td { color: var(--ag-heading); }
+    .kv tr:last-child th, .kv tr:last-child td { border-bottom: 0; }
+    .tbl-wrap { margin-top: 14px; border: 1px solid var(--ag-border); border-radius: 10px; overflow: hidden; }
+    .tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .tbl th, .tbl td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--ag-border); }
+    .tbl thead th { background: var(--ag-surface-2); font-size: 13px; font-weight: 600; color: var(--ag-text-2); }
+    .tbl tbody tr:last-child td { border-bottom: 0; }
+    @media (max-width: 700px) { .kv th { width: 120px; } }
+    .sample-note { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border-radius: 8px; background: var(--ag-warning-bg); color: var(--ag-warning); font-size: 13px; }
+    .sample-note .ico { width: 16px; height: 16px; margin-top: 2px; }
+
     .missing { text-align: center; padding: 64px 16px; border: 1px dashed var(--ag-divider); border-radius: 12px; background: var(--ag-warm); margin: 28px 0 64px; }
     .missing b { display: block; font-size: 17px; color: var(--ag-heading); }
     .missing span { display: block; color: var(--ag-muted); margin: 4px 0 16px; }
@@ -200,6 +215,7 @@
       <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
       <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
       <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></symbol>
+      <symbol id="i-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.5-.8-1.4-1.2-2.5-1.2-1.5 0-2.5.8-2.5 2s1 1.6 2.5 2 2.5.9 2.5 2.1-1.1 1.9-2.5 1.9c-1.2 0-2.2-.5-2.6-1.3M12 6.5v1.5M12 16v1.5"/></symbol>
       <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></symbol>
     </defs>
   </svg>
@@ -265,6 +281,39 @@
     const notListed = '<span class="none">Not listed yet</span>';
     const fact = (k, v) => `<div class="fact"><span>${k}</span><span>${v}</span></div>`;
     const H = (ic, t) => `<h2 class="h-sec"><span class="hic">${icon(ic)}</span>${t}</h2>`;
+
+    /* ----- "Scholarship details" block: what the university keys in, as a plain table ----- */
+    const sd = isSch ? SCHOLARSHIP_DETAILS[url] || null : null;
+    const ALL_ASEAN = ['Brunei', 'Cambodia', 'Indonesia', 'Laos', 'Malaysia', 'Myanmar', 'Philippines', 'Singapore', 'Thailand', 'Timor-Leste', 'Vietnam'];
+    const usd = n => 'USD ' + n.toLocaleString('en-US');
+    const awardName = a => a.kind === 'full' ? 'Full scholarship' : 'Partial scholarship';
+    const awardValue = a => a.text || (a.kind === 'full' ? 'Full tuition fee' : a.kind === 'percent' ? `${a.value}% tuition fee waiver` : usd(a.value));
+    const awardLine = a => a.kind === 'full' ? 'Full scholarship' : `Partial scholarship (${awardValue(a)})`;
+    function detailsBlock() {
+      if (!sd) return '';
+      const nat = sd.nationalities.length === ALL_ASEAN.length ? 'All ASEAN countries'
+        : sd.nationalities.length === ALL_ASEAN.length - 1 ? `All ASEAN countries except ${ALL_ASEAN.find(c => !sd.nationalities.includes(c))}`
+        : sd.nationalities.join(', ');
+      // "CGPA (out of 4.0)" + 3.00 -> "CGPA 3.00 and above (out of 4.0)"
+      const split = sc => { const m = sc.match(/^(.*?)\s*(\(.*\))?$/); return [m[1], m[2] ? ' ' + m[2] : '']; };
+      const fmt = n => Number.isInteger(n) ? String(n) : n.toFixed(2);
+      const grade = sd.grade ? (([n, unit]) => `${n} ${sd.grade.min} and above${unit}`)(split(sd.grade.scale))
+        : sd.tiers ? (([n, unit]) => `${n} ${fmt(sd.tiers.rows[sd.tiers.rows.length - 1].min)} and above${unit}`)(split(sd.tiers.scale)) : 'No minimum grade';
+      const eng = sd.english.map(([t, m]) => m ? `${t} ${m}` : t).join(sd.english.some(e => e[1]) ? ' or ' : ', ');
+      const fields = sd.fields === 'all' ? 'All fields of study' : sd.fields.map(([f, sub]) => sub ? `${esc(f)} (${esc(sub)})` : esc(f)).join('<br>');
+      const rows = [
+        ['Scholarship', sd.tiers ? 'Depends on your results (see below)' : `${awardName(sd.award)} · ${esc(awardValue(sd.award))}`],
+        ['Academic requirement', grade],
+        ['English requirement', esc(eng)],
+        ['Nationality', nat],
+        ['Level of study', sd.levels.join(', ')],
+        ['Field of study', fields],
+        ...(sd.age ? [['Age', `${sd.age[0]} to ${sd.age[1]} years old`]] : []),
+      ];
+      const tiers = sd.tiers ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>${esc(sd.tiers.scale)}</th><th>Scholarship</th></tr></thead><tbody>${sd.tiers.rows.map((r, i, all) =>
+        `<tr><td>${i === 0 ? `${fmt(r.min)} and above` : `${fmt(r.min)} – ${fmt(+(all[i - 1].min - (Number.isInteger(all[i - 1].min) ? 1 : 0.01)).toFixed(2))}`}</td><td>${esc(awardLine(r.award))}</td></tr>`).join('')}</tbody></table></div>` : '';
+      return `<section class="sec">${H('coin', 'Scholarship details')}<table class="kv"><tbody>${rows.map(([k, v]) => `<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join('')}</tbody></table>${tiers}</section>`;
+    }
     const pending = what => `<div class="pending">${icon('info')}<div><b>${what} haven't been added yet</b><span>We're still collecting the full details for this ${WORD.one}.</span></div></div>`;
 
     function actions() {
@@ -321,6 +370,8 @@
            ${fact('Location', it.loc ? esc(it.loc) : '<span class="none">Not listed</span>')}`
         : `${fact('Field of study', field ? esc(field) : notListed)}
            ${fact('Dates', md ? md.text : '<span class="none">To be announced</span>')}
+           ${page?.duration ? fact('Duration', esc(page.duration)) : ''}
+           ${page?.cost ? fact('Cost', esc(page.cost)) : ''}
            ${fact('Host country', esc(it.c))}
            ${fact('Location', it.loc ? esc(it.loc) : '<span class="none">Not listed</span>')}`;
 
@@ -335,7 +386,9 @@
 
         <div class="layout">
           <div class="main">
+            ${page?.sample ? `<div class="sample-note">${icon('info')}<span><b>Sample content.</b> This text is made up for testing the design and isn't from ${esc(it.inst)}.</span></div>` : ''}
             <section class="sec">${H('book', 'Overview')}${page ? `<div class="prose">${page.overview.map(p => `<p>${p}</p>`).join('')}</div>` : pending('The overview and details')}</section>
+            ${detailsBlock()}
             <section class="sec">${H('shield', 'Eligibility criteria')}${page
               ? page.criteria.map(g => `${g.h ? `<h3 class="h-sub">${g.h}</h3>` : ''}<ul class="ticks">${g.items.map(i => `<li>${i}</li>`).join('')}</ul>`).join('') +
                 (det ? `<h3 class="h-sub" style="margin-top:20px">Open to students from</h3><div class="chips">${det.countries.map(c => `<span class="chip">${c}</span>`).join('')}</div>` : '')

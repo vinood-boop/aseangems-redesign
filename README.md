@@ -15,4 +15,4 @@ Static HTML prototypes for the ASEAN GEMS student pages. No build step: open any
 
 Bookmarks, compare picks, application drafts and submitted applications are kept in the browser's `localStorage`, so they carry across pages on one browser only.
 
-`CLAUDE.md` holds the design system (fonts, colours, components). All names, emails and phone numbers in the pages are made-up sample data.
+`CLAUDE.md` holds the design system (fonts, colours, components). All names, emails and phone numbers in the pages are made-up sample data. Scholarship and mobility pages marked "Sample content" use made-up details for testing the design; only Mila's ASEAN Scholarship Scheme and MSU SMILE use real content.
